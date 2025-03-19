@@ -31,22 +31,22 @@ A **Node.js + Express** backend for a **Placement Cell Management System**, allo
 
 ### Auth Router
 
-- `POST /api/auth/signup` → Employee signup
-- `POST /api/auth/login` → Employee login
+- `POST /auth/signup` → Employee signup
+- `POST /auth/login` → Employee login
 
 ### Students Router
 
-- `GET /api/students` → Get all students
-- `POST /api/students` → Add new student
+- `GET /students` → Get all students
+- `POST /students` → Add new student
 
 ### Interview Router
 
-- `GET /api/interviews` → Get all interviews
-- `POST /api/interviews` → Add new interview
-- `PUT /api/interviews/:interviewID/assign/:studentID` → Assign student to interview
-- `GET /api/interviews/:interviewID/students` → View all students assigned to an interview
+- `GET /interviews` → Get all interviews
+- `POST /interviews` → Add new interview
+- `PUT /interviews/:interviewID/assign/:studentID` → Assign student to interview
+- `GET /interviews/:interviewID/students` → View all students assigned to an interview
 
 ### Results Router
 
-- `GET /api/results` → Get all results (CSV)
-- `PUT /api/results/:resultID` → Update student result for an interview
+- `GET /results` → Get all results (CSV)
+- `PUT /results/:resultID` → Update student result for an interview
