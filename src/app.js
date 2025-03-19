@@ -4,14 +4,20 @@ const cookieParser = require("cookie-parser");
 
 const { connectToDB } = require("./config/database");
 
+const { authRouter } = require("./routes/auth.router");
+const { interviewRouter } = require("./routes/interview.router");
+const { resultRouter } = require("./routes/result.router");
+const { studentRouter } = require("./routes/student.router");
+
 const port = 7000;
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
-  res.status(200).json({ message: "Hello from server..!" });
-});
+app.use("/", authRouter);
+app.use("/", interviewRouter);
+app.use("/", resultRouter);
+app.use("/", studentRouter);
 
 connectToDB()
   .then(() => {
