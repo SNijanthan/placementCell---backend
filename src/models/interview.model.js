@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const interviewSchema = new mongoose.Schema(
   {
-    interviewDate: { type: Date, required: true, default: Date.now },
+    interviewDate: { type: Date, required: true },
     companyName: {
       type: String,
       required: true,
