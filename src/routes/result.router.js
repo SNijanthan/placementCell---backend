@@ -1,6 +1,8 @@
 const express = require("express");
 const resultRouter = express.Router();
 
+const json2csv = require("json-2-csv");
+
 const { auth } = require("../middleware/auth.middleware");
 
 const { StudentModel } = require("../models/student.model");
@@ -80,6 +82,48 @@ resultRouter.post("/results", auth, async (req, res) => {
       .json({ message: "Result updated successfully", populateResult });
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
+  }
+});
+
+// Downloading results in CSV format
+
+resultRouter.get("/results/download-csv", async (req, res) => {
+  try {
+    const results = await ResultModel.find()
+      .populate("student", SAFE_DATA)
+      .populate("interview", "interviewDate companyName");
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    // Convert MongoDB documents to plain objects
+    const resultsArray = results.map((result) => ({
+      _id: result._id.toString(),
+      name: result.student?.name || "N/A",
+      college: result.student?.college || "N/A",
+      status: result.student?.status || "N/A",
+      dsaScore: result.student?.dsaScore || "N/A",
+      webDScore: result.student?.webDScore || "N/A",
+      reactScore: result.student?.reactScore || "N/A",
+      interviewDate: result.interview?.date || "N/A",
+      companyName: result.interview?.companyName || "N/A",
+      result: result.result,
+      createdAt: result.createdAt.toISOString(),
+      updatedAt: result.updatedAt.toISOString(),
+    }));
+
+    // Convert JSON to CSV
+    const csvData = json2csv.json2csv(resultsArray);
+
+    // Set response headers for file download
+    res.setHeader("Content-Disposition", "attachment; filename=results.csv");
+    res.setHeader("Content-Type", "text/csv");
+
+    res.status(200).send(csvData);
+  } catch (error) {
+    console.error("Error generating CSV:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
