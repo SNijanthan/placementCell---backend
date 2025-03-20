@@ -49,4 +49,4 @@ A **Node.js + Express** backend for a **Placement Cell Management System**, allo
 ### Results Router
 
 - `GET /results` → Get all results (CSV)
-- `PUT /results/:resultID` → Update student result for an interview
+- `PUT /results` → Assign a Update student result for an interview
