@@ -6,6 +6,8 @@ const { auth } = require("../middleware/auth.middleware");
 const { InterviewModel } = require("../models/interview.model");
 const { StudentModel } = require("../models/student.model");
 
+const SAFE_DATA = "name college status dsaScore webDScore reactScore";
+
 // Get all interviews
 
 interviewRouter.get("/interviews", auth, async (req, res) => {
@@ -23,10 +25,7 @@ interviewRouter.get("/interviews", auth, async (req, res) => {
       .skip(skip)
       .limit(limit)
       .select("interviewDate companyName students")
-      .populate(
-        "students",
-        "name college status dsaScore webDScore reactScore"
-      );
+      .populate("students", SAFE_DATA);
 
     if (interviews.length === 0) {
       return res.status(200).json({ message: "No interviews found..!" });
@@ -113,10 +112,7 @@ interviewRouter.patch(
         interviewID,
         { $addToSet: { students: studentID } },
         { runValidators: true, new: true }
-      ).populate(
-        "students",
-        "name college status dsaScore webDScore reactScore"
-      );
+      ).populate("students", SAFE_DATA);
 
       res.status(200).json({
         message: `Interview assigned to ${student.name}`,
@@ -133,7 +129,23 @@ interviewRouter.patch(
 interviewRouter.get(
   "/interviews/:interviewID/students",
   auth,
-  async (req, res) => {}
+  async (req, res) => {
+    try {
+      const { interviewID } = req.params;
+
+      const interview = await InterviewModel.findById(interviewID)
+        .select("interviewDate companyName")
+        .populate("students", SAFE_DATA);
+
+      if (!interview) {
+        return res.status(404).json({ message: "Interview does not exist..!" });
+      }
+
+      res.status(200).json({ message: "Data fetched successfully", interview });
+    } catch (error) {
+      res.status(500).json({ message: `Server Error: ${error.message}` });
+    }
+  }
 );
 
 module.exports = { interviewRouter };
