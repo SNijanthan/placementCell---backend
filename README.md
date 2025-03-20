@@ -48,6 +48,6 @@ A **Node.js + Express** backend for a **Placement Cell Management System**, allo
 
 ### Results Router
 
-- `GET /results` → Get all results (CSV)
+- `GET /results` → Get all results
 - `POST /results` → Update student result for an interview
 - `GET /results/download-csv` → Download results in CSV format
