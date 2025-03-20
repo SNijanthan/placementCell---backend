@@ -43,7 +43,7 @@ A **Node.js + Express** backend for a **Placement Cell Management System**, allo
 
 - `GET /interviews` → Get all interviews
 - `POST /interviews` → Add new interview
-- `PUT /interviews/:interviewID/assign/:studentID` → Assign student to interview
+- `PATCH /interviews/:interviewID/assign/:studentID` → Assign student to interview
 - `GET /interviews/:interviewID/students` → View all students assigned to an interview
 
 ### Results Router
