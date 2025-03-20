@@ -21,7 +21,8 @@ const studentSchema = new mongoose.Schema(
       lowercase: true,
       enum: {
         values: ["placed", "not_placed"],
-        message: "{VALUE} is not defined",
+        message:
+          "{VALUE} is not defined, Defined valued - [placed, not_placed]",
       },
     },
     dsaScore: { type: Number, default: null, min: 0, max: 100 },

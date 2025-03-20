@@ -1,18 +1,21 @@
 const express = require("express");
 const interviewRouter = express.Router();
 
+const { auth } = require("../middleware/auth.middleware");
+
 // Get all interviews
 
-interviewRouter.get("/interviews", async (req, res) => {});
+interviewRouter.get("/interviews", auth, async (req, res) => {});
 
 // Add new interview
 
-interviewRouter.post("/interviews", async (req, res) => {});
+interviewRouter.post("/interviews", auth, async (req, res) => {});
 
 // Assign student to interview
 
 interviewRouter.put(
   "/interviews/:interviewID/assign/:studentID",
+  auth,
   async (req, res) => {}
 );
 
@@ -20,6 +23,7 @@ interviewRouter.put(
 
 interviewRouter.get(
   "/interviews/:interviewID/students",
+  auth,
   async (req, res) => {}
 );
 
