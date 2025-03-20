@@ -4,13 +4,16 @@ const interviewRouter = express.Router();
 const { auth } = require("../middleware/auth.middleware");
 
 const { InterviewModel } = require("../models/interview.model");
+const { StudentModel } = require("../models/student.model");
 
 // Get all interviews
 
 interviewRouter.get("/interviews", auth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    let limit = parseInt(req.query.limit) || 10;
+
+    limit = limit > 50 ? 50 : limit;
 
     const skip = (page - 1) * limit;
 
@@ -19,7 +22,11 @@ interviewRouter.get("/interviews", auth, async (req, res) => {
     const interviews = await InterviewModel.find()
       .skip(skip)
       .limit(limit)
-      .select("interviewDate companyName students");
+      .select("interviewDate companyName students")
+      .populate(
+        "students",
+        "name college status dsaScore webDScore reactScore"
+      );
 
     if (interviews.length === 0) {
       return res.status(200).json({ message: "No interviews found..!" });
@@ -83,10 +90,42 @@ interviewRouter.post("/interviews", auth, async (req, res) => {
 
 // Assign student to interview
 
-interviewRouter.put(
+interviewRouter.patch(
   "/interviews/:interviewID/assign/:studentID",
   auth,
-  async (req, res) => {}
+  async (req, res) => {
+    try {
+      const { interviewID, studentID } = req.params;
+
+      const interview = await InterviewModel.findById(interviewID);
+
+      if (!interview) {
+        return res.status(404).json({ message: "Interview not found ..!" });
+      }
+
+      const student = await StudentModel.findById(studentID);
+
+      if (!student) {
+        return res.status(404).json({ message: "Student not found ..!" });
+      }
+
+      const updateInterview = await InterviewModel.findByIdAndUpdate(
+        interviewID,
+        { $addToSet: { students: studentID } },
+        { runValidators: true, new: true }
+      ).populate(
+        "students",
+        "name college status dsaScore webDScore reactScore"
+      );
+
+      res.status(200).json({
+        message: `Interview assigned to ${student.name}`,
+        updateInterview,
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Server Error: ${error.message}` });
+    }
+  }
 );
 
 // View all students assigned to an interview
