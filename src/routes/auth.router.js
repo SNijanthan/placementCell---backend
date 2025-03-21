@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 
-const { validateSignUpUser } = require("../utils/validator");
+const { validateSignUpUser, validateLogInUser } = require("../utils/validator");
 const { EmployeeModel } = require("../models/employee.model");
 
 // Employee signup
@@ -15,6 +15,12 @@ authRouter.post("/auth/signup", async (req, res) => {
     validateSignUpUser(req);
 
     const { email, password } = req.body;
+
+    const existingUserDetails = await EmployeeModel.findOne({ email });
+
+    if (existingUserDetails) {
+      throw new Error("Email already exists. Please try other email");
+    }
 
     // Hashing password
 
@@ -27,7 +33,7 @@ authRouter.post("/auth/signup", async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({ message: "Employee added successfully", user });
+    res.status(201).json({ message: "User added successfully", user });
   } catch (error) {
     res.status(400).json({ message: `ERROR: ${error.message}` });
   }
@@ -37,6 +43,7 @@ authRouter.post("/auth/signup", async (req, res) => {
 
 authRouter.post("/auth/login", async (req, res) => {
   try {
+    validateLogInUser(req);
     const { email, password } = req.body;
 
     const existingUser = await EmployeeModel.findOne({ email });
@@ -48,7 +55,7 @@ authRouter.post("/auth/login", async (req, res) => {
       : false;
 
     if (!existingUser || !isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid Email or Password" });
     }
 
     // Generate JWT token

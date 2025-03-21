@@ -22,6 +22,14 @@ const validateSignUpUser = (req) => {
   }
 };
 
+const validateLogInUser = (req) => {
+  const { email, password } = req.body;
+
+  if (!email && !password) {
+    throw new Error("Fields cannot be empty");
+  }
+};
+
 const validateStudentData = (req) => {
   const { name, college, status, dsaScore, webDScore, reactScore } = req.body;
 
@@ -41,4 +49,4 @@ const validateStudentData = (req) => {
   }
 };
 
-module.exports = { validateSignUpUser, validateStudentData };
+module.exports = { validateSignUpUser, validateLogInUser, validateStudentData };
