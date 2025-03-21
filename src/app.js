@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
 
@@ -11,6 +12,12 @@ const { studentRouter } = require("./routes/student.router");
 
 const port = 7000;
 
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Whitelisting domain name
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
