@@ -7,6 +7,7 @@ require("dotenv").config();
 
 const { validateSignUpUser, validateLogInUser } = require("../utils/validator");
 const { EmployeeModel } = require("../models/employee.model");
+const { auth } = require("../middleware/auth.middleware");
 
 // Employee signup
 
@@ -70,6 +71,33 @@ authRouter.post("/auth/login", async (req, res) => {
       .cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
       .status(200)
       .json({ message: "Loggedin successfully", existingUser });
+  } catch (error) {
+    res.status(401).json({ message: `ERROR: ${error.message}` });
+  }
+});
+
+authRouter.get("/view-profile", auth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    console.log(loggedInUser);
+    const user = await EmployeeModel.findOne({ email: loggedInUser.email });
+    if (!user) {
+      return res.status(200).json({ message: "No user found" });
+    }
+    res
+      .status(200)
+      .json({ message: "User profile retrieved successfully", user });
+  } catch (error) {
+    res.status(401).json({ message: `ERROR: ${error.message}` });
+  }
+});
+
+authRouter.post("/logout", auth, async (req, res) => {
+  try {
+    res
+      .cookie("token", null, { expires: new Date(0), httpOnly: true })
+      .status(200)
+      .json({ message: "User logged out successfully" });
   } catch (error) {
     res.status(401).json({ message: `ERROR: ${error.message}` });
   }
