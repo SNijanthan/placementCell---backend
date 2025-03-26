@@ -79,7 +79,6 @@ authRouter.post("/auth/login", async (req, res) => {
 authRouter.get("/view-profile", auth, async (req, res) => {
   try {
     const loggedInUser = req.user;
-    console.log(loggedInUser);
     const user = await EmployeeModel.findOne({ email: loggedInUser.email });
     if (!user) {
       return res.status(200).json({ message: "No user found" });
@@ -92,7 +91,7 @@ authRouter.get("/view-profile", auth, async (req, res) => {
   }
 });
 
-authRouter.post("/logout", auth, async (req, res) => {
+authRouter.post("/logout", async (req, res) => {
   try {
     res
       .cookie("token", null, { expires: new Date(0), httpOnly: true })

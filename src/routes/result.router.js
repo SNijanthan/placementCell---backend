@@ -1,7 +1,7 @@
 const express = require("express");
 const resultRouter = express.Router();
 
-const json2csv = require("json-2-csv");
+const ExcelJS = require("exceljs");
 
 const { auth } = require("../middleware/auth.middleware");
 
@@ -97,32 +97,56 @@ resultRouter.get("/results/download-csv", async (req, res) => {
       return res.status(404).json({ message: "No results found" });
     }
 
-    // Convert MongoDB documents to plain objects
-    const resultsArray = results.map((result) => ({
-      _id: result._id.toString(),
-      name: result.student?.name || "N/A",
-      college: result.student?.college || "N/A",
-      status: result.student?.status || "N/A",
-      dsaScore: result.student?.dsaScore || "N/A",
-      webDScore: result.student?.webDScore || "N/A",
-      reactScore: result.student?.reactScore || "N/A",
-      interviewDate: result.interview?.date || "N/A",
-      companyName: result.interview?.companyName || "N/A",
-      result: result.result,
-      createdAt: result.createdAt.toISOString(),
-      updatedAt: result.updatedAt.toISOString(),
-    }));
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Results");
 
-    // Convert JSON to CSV
-    const csvData = json2csv.json2csv(resultsArray);
+    // Define the columns
+    worksheet.columns = [
+      { header: "ID", key: "_id", width: 25 },
+      { header: "Name", key: "name", width: 20 },
+      { header: "College", key: "college", width: 20 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "DSA Score", key: "dsaScore", width: 15 },
+      { header: "WebD Score", key: "webDScore", width: 15 },
+      { header: "React Score", key: "reactScore", width: 15 },
+      { header: "Interview Date", key: "interviewDate", width: 20 },
+      { header: "Company Name", key: "companyName", width: 20 },
+      { header: "Result", key: "result", width: 15 },
+      { header: "Created At", key: "createdAt", width: 25 },
+      { header: "Updated At", key: "updatedAt", width: 25 },
+    ];
+
+    // Add rows to the worksheet
+    results.forEach((result) => {
+      worksheet.addRow({
+        _id: result._id.toString(),
+        name: result.student?.name || "N/A",
+        college: result.student?.college || "N/A",
+        status: result.student?.status || "N/A",
+        dsaScore: result.student?.dsaScore || "N/A",
+        webDScore: result.student?.webDScore || "N/A",
+        reactScore: result.student?.reactScore || "N/A",
+        interviewDate: result.interview?.interviewDate || "N/A",
+        companyName: result.interview?.companyName || "N/A",
+        result: result.result,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
+      });
+    });
 
     // Set response headers for file download
-    res.setHeader("Content-Disposition", "attachment; filename=results.csv");
-    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=results.xlsx");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
 
-    res.status(200).send(csvData);
+    // Write file to response
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (error) {
-    console.error("Error generating CSV:", error);
+    console.error("Error generating Excel file:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

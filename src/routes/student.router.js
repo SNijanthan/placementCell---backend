@@ -24,7 +24,7 @@ studentRouter.get("/students", auth, async (req, res) => {
       .limit(limit);
 
     if (students.length === 0) {
-      return res.status(200).message({ message: "No students found ..!" });
+      return res.status(200).json({ message: "No students found ..!" });
     }
 
     const total = await StudentModel.countDocuments();
@@ -49,7 +49,10 @@ studentRouter.post("/students", auth, async (req, res) => {
 
     const { name, college, status, dsaScore, webDScore, reactScore } = req.body;
 
-    const existingStudent = await StudentModel.findOne({ name, college });
+    const existingStudent = await StudentModel.findOne({
+      name: name,
+      college: college,
+    });
 
     if (existingStudent) {
       return res
@@ -58,8 +61,8 @@ studentRouter.post("/students", auth, async (req, res) => {
     }
 
     const student = new StudentModel({
-      name,
-      college,
+      name: name,
+      college: college,
       status,
       dsaScore,
       webDScore,
