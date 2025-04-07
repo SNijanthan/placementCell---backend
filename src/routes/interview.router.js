@@ -96,27 +96,28 @@ interviewRouter.patch(
     try {
       const { interviewID, studentID } = req.params;
 
+      // Check if interview exists
       const interview = await InterviewModel.findById(interviewID);
-
       if (!interview) {
-        return res.status(404).json({ message: "Interview not found ..!" });
+        return res.status(404).json({ message: "Interview not found!" });
       }
 
+      // Check if student exists
       const student = await StudentModel.findById(studentID);
-
       if (!student) {
-        return res.status(404).json({ message: "Student not found ..!" });
+        return res.status(404).json({ message: "Student not found!" });
       }
 
-      const updateInterview = await InterviewModel.findByIdAndUpdate(
+      // Update interview by adding student to students array
+      const updatedInterview = await InterviewModel.findByIdAndUpdate(
         interviewID,
-        { $addToSet: { students: studentID } },
+        { $addToSet: { students: studentID } }, // Prevents duplicate entries
         { runValidators: true, new: true }
-      ).populate("students", SAFE_DATA);
+      ).populate("students", SAFE_DATA); // Ensure full student data is returned
 
       res.status(200).json({
         message: `Interview assigned to ${student.name}`,
-        updateInterview,
+        updateInterview: updatedInterview,
       });
     } catch (error) {
       res.status(500).json({ message: `Server Error: ${error.message}` });
@@ -147,5 +148,23 @@ interviewRouter.get(
     }
   }
 );
+
+// Assigned Interviews
+
+interviewRouter.get("/assign/interviews", auth, async (req, res) => {
+  try {
+    const interview = await InterviewModel.find()
+      .select("interviewDate companyName")
+      .populate("students", SAFE_DATA);
+
+    if (!interview) {
+      return res.status(404).json({ message: "Interview does not exist..!" });
+    }
+
+    res.status(200).json({ message: "Data fetched successfully", interview });
+  } catch (error) {
+    res.status(500).json({ message: `Server Error: ${error.message}` });
+  }
+});
 
 module.exports = { interviewRouter };

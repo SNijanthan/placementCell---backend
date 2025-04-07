@@ -21,9 +21,8 @@ resultRouter.get("/results", auth, async (req, res) => {
       .populate("interview", "interviewDate companyName");
 
     if (results.length === 0) {
-      return res.status(404).json({ message: "Results not exist..!" });
+      return res.status(200).json({ message: "Results not exist..!" });
     }
-
     res.status(200).json({ message: "Data retrived successfully", results });
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
@@ -73,13 +72,11 @@ resultRouter.post("/results", auth, async (req, res) => {
 
     await newResult.save();
 
-    const populateResult = await ResultModel.findById(newResult._id)
+    const results = await ResultModel.findById(newResult._id)
       .populate("student", SAFE_DATA)
       .populate("interview", "interviewDate companyName");
 
-    res
-      .status(201)
-      .json({ message: "Result updated successfully", populateResult });
+    res.status(201).json({ message: "Result updated successfully", results });
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
   }
@@ -92,6 +89,8 @@ resultRouter.get("/results/download-csv", async (req, res) => {
     const results = await ResultModel.find()
       .populate("student", SAFE_DATA)
       .populate("interview", "interviewDate companyName");
+
+    console.log("Fetched results:", results); // Debugging log
 
     if (!results || results.length === 0) {
       return res.status(404).json({ message: "No results found" });
@@ -120,7 +119,7 @@ resultRouter.get("/results/download-csv", async (req, res) => {
     // Add rows to the worksheet
     results.forEach((result) => {
       worksheet.addRow({
-        _id: result._id.toString(),
+        _id: result._id?.toString() || "N/A",
         name: result.student?.name || "N/A",
         college: result.student?.college || "N/A",
         status: result.student?.status || "N/A",
@@ -129,11 +128,13 @@ resultRouter.get("/results/download-csv", async (req, res) => {
         reactScore: result.student?.reactScore || "N/A",
         interviewDate: result.interview?.interviewDate || "N/A",
         companyName: result.interview?.companyName || "N/A",
-        result: result.result,
-        createdAt: result.createdAt.toISOString(),
-        updatedAt: result.updatedAt.toISOString(),
+        result: result.result || "N/A",
+        createdAt: result.createdAt ? result.createdAt.toISOString() : "N/A",
+        updatedAt: result.updatedAt ? result.updatedAt.toISOString() : "N/A",
       });
     });
+
+    console.log("Excel file generated successfully");
 
     // Set response headers for file download
     res.setHeader("Content-Disposition", "attachment; filename=results.xlsx");
