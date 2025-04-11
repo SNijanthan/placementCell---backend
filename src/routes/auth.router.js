@@ -68,7 +68,12 @@ authRouter.post("/auth/login", async (req, res) => {
     // Attach token to a secure cookie
 
     res
-      .cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true, // ✅ required for HTTPS
+        sameSite: "None", // ✅ allows cross-site cookies
+        maxAge: 24 * 60 * 60 * 1000,
+      })
       .status(200)
       .json({ message: "Loggedin successfully", existingUser });
   } catch (error) {
