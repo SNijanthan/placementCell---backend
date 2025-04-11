@@ -99,7 +99,12 @@ authRouter.get("/view-profile", auth, async (req, res) => {
 authRouter.post("/logout", async (req, res) => {
   try {
     res
-      .cookie("token", null, { expires: new Date(0), httpOnly: true })
+      .cookie("token", null, {
+        httpOnly: true,
+        secure: true, // ✅ Important for HTTPS
+        sameSite: "None", // ✅ Needed for cross-domain
+        expires: new Date(0), // ✅ Expire immediately
+      })
       .status(200)
       .json({ message: "User logged out successfully" });
   } catch (error) {
